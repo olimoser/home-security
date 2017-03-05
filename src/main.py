@@ -31,7 +31,7 @@ def prepare_paths():
             os.mkdir(directory)
 
 
-def process_file(f):
+def process_image(f):
     file_name = f.split("/")[-1]
     logger.debug("processing: {0}".format(file_name))
     shutil.move(f, PATH_PROCESS)
@@ -47,18 +47,49 @@ def process_file(f):
         cv2.waitKey(0)
 
 
+def process_video(f):
+    file_name = f.split("/")[-1]
+    logger.debug("processing: {0}".format(file_name))
+    shutil.move(f, PATH_PROCESS)
+
+    video = cv2.VideoCapture(PATH_PROCESS + file_name)
+
+    while video.isOpened():
+        ret, frame = video.read()
+        #rois = detectors.detect_person(frame)
+        #logger.info("found {0} persons".format(len(rois)))
+
+        if DEBUG:
+            #cv2.drawContours(frame, rois, -1, ROI_COLOR)
+            cv2.imshow("image", frame)
+            cv2.waitKey(1)
+
+
 def find_new_pictures():
-    file_list = glob.glob(PATH_NEW_IMAGES + FILE_PATTERN)
+    file_list = glob.glob(PATH_NEW_IMAGES + IMAGE_PATTERN)
 
     if len(file_list) == 0:
-        logger.debug("no new files. nothing to do. ...")
+        logger.debug("no new images. nothing to do. ...")
         return
 
     for f in file_list:
-        process_file(f)
+        process_image(f)
+
+
+def find_new_videos():
+    file_list = glob.glob(PATH_NEW_IMAGES + VIDEO_PATTERN)
+
+    if len(file_list) == 0:
+        logger.debug("no new videos. nothing to do. ...")
+        return
+
+    for f in file_list:
+        process_video(f)
 
 
 prepare_paths()
 find_new_pictures()
+
+find_new_videos()
 
 cv2.destroyAllWindows()
